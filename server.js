@@ -8,6 +8,10 @@ const morgan = require('morgan');
 const session = require('express-session');
 
 const authController = require('./controllers/auth.js');
+const applicationController = require('./controllers/applications.js');
+const passUserToView = require('./middleware/pass-user-to-view.js');
+//before we can use it, we need to require it
+const isLoggedin = require('./middleware/isLoggedin.js');
 
 const port = process.env.PORT ? process.env.PORT : '3000';
 
@@ -28,21 +32,32 @@ app.use(
   })
 );
 
+app.use(passUserToView);
+
+//landding page
 app.get('/', (req, res) => {
-  res.render('index.ejs', {
-    user: req.session.user,
-  });
+
+  if (req.session.user) {
+    res.redirect(`/users/${req.session.user._id}/applications`);
+  }else{
+    res.render('index.ejs');
+  }
+
 });
 
-app.get('/vip-lounge', (req, res) => {
-  if (req.session.user) {
-    res.send(`Welcome to the party ${req.session.user.username}.`);
-  } else {
-    res.send('Sorry, no guests allowed.');
-  }
-});
+
+// app.get('/vip-lounge', (req, res) => {
+//   if (req.session.user) {
+//     res.send(`Welcome to the party ${req.session.user.username}.`);
+//   } else {
+//     res.send('Sorry, no guests allowed.');
+//   }
+// });
 
 app.use('/auth', authController);
+
+app.use(isLoggedin);
+app.use('/users/:userId/applications', applicationController);
 
 app.listen(port, () => {
   console.log(`The express app is ready on port ${port}!`);
