@@ -12,7 +12,14 @@
     
     <ul>
         <% applications.forEach((application)=>{ %>
-          <li><%= application.title %> at <%= application.company %></li>
+        <li>
+            <a href="/users/<%=user._id%>/applications/<%=application._id%>">View</a>
+
+            <%= application.title %> at <%= application.company %>
+
+
+        </li>
+
         <% }) %>
     </ul>
 
